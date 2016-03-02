@@ -1,0 +1,33 @@
+#recommendedmenu 
+{
+	padding: 0;
+	margin: 0;
+	list-style: none;
+	width: 200px;
+	background-color: #F5F5F5;
+	border-bottom: 1px gray solid;
+	font-family: Verdana, Arial, Helvetica, sans-serif;
+	font-size: 12px;
+}
+
+#recommendedmenu li 
+{
+	border-top: 1px gray solid;
+	border-left: 1px gray solid;
+	border-right: 1px gray solid;
+}
+
+#recommendedmenu li a 
+{
+	text-decoration: none;
+	display: block;
+	color: #333333;
+	font-weight: bold;
+	padding: 8px 5px;
+}
+
+#recommendedmenu li a:hover 
+{
+	background-color: #505050;
+	color: #EEEEEE;
+}

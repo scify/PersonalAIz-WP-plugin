@@ -41,10 +41,13 @@ class MyNewsRecommender {
         add_action('wp', array($this, 'post_loaded'));
 
         // register style on initialization
+        add_action('init', array($this, 'register_style'));
+        // register scripts on initialization
         add_action('init', array($this, 'register_script'));
 
         // use the registered style above
         add_action('wp_enqueue_scripts', array($this, 'enqueue_style'));
+        add_action('wp_enqueue_scripts', array($this, 'enqueue_script'));
 
         // hook after user regitration
         add_action('user_register', array($this, 'user_registration'));
@@ -125,8 +128,13 @@ class MyNewsRecommender {
     /**
      * Register css file for widget.
      */
-    public function register_script() {
+    public function register_style() {
         wp_register_style('widgetstyle', plugins_url('/css/widget-style.css', __FILE__), false, '1.0.0', 'all');
+        wp_register_style('bootstrapstyle', plugins_url('/css/bootstrap.min.css', __FILE__), false, '1.0.0', 'all');
+    }
+    public function register_script() {
+        wp_register_script('bootstrapscript', plugins_url('/js/bootstrap.min.js', __FILE__), false, '1.0.0', 'all');
+        wp_register_script('jqueryscript', plugins_url('/js/jquery-2.2.1.min.js', __FILE__), false, '1.0.0', 'all');
     }
 
     /**
@@ -134,8 +142,13 @@ class MyNewsRecommender {
      */
     public function enqueue_style() {
         wp_enqueue_style('widgetstyle');
+        wp_enqueue_style('bootstrapstyle');
     }
-
+    public function enqueue_script() {
+        wp_enqueue_script('bootstrapscript');
+        wp_enqueue_script('jqueryscript');
+    }
+    
     /**
      *
      * This function is called when a post has been loaded.

@@ -50,12 +50,15 @@ class RecommenderWidget extends WP_Widget {
             if (count($recommendations) == 0) {
                 echo "There are no recommended posts!";
             } else {
-                echo "<ul id='recommendedmenu'>";
+
+                echo '<div class="list-group">';
+
                 foreach ($recommendations as $postid) {
                     $post = get_post($postid);
-                    echo "<li><a href='" . get_permalink($post->ID) . "'>" . $post->post_title . "</a></li>";
+                    echo '<a href="' . get_permalink($post->ID) . '" class="list-group-item">' . $post->post_title . '</a>';
                 }
-                echo "</ul>";
+
+                echo '</div>';
             }
         }
 
@@ -150,24 +153,26 @@ class RecommenderWidget extends WP_Widget {
      */
     private function recommendation_expired($userid) {
 
-        // get user's last recommendation timestamp
-        $lasttimestamp = DbManager::get_last_timestamp($userid);
-
-        // if no recommendation has been done there is no need to check the timestamp
-        if (!is_null($lasttimestamp)) {
-            // get the current timestamp
-            $currenttimestamp = (int) current_time('timestamp');
-
-            // get recommendation window(in hours) from wordpress options and convert it to seconds
-            $recommendationwindow = $this->settingsmanager->getLastHoursCount() * 3600;
-
-            // check if '$recommendationwindow' hours passed without a recommendation
-            if ($currenttimestamp > $lasttimestamp + $recommendationwindow) {
-                return TRUE;
-            }
-        }
-
-        return FALSE;
+//        // get user's last recommendation timestamp
+//        $lasttimestamp = DbManager::get_last_timestamp($userid);
+//
+//        // if no recommendation has been done there is no need to check the timestamp
+//        if (!is_null($lasttimestamp)) {
+//            // get the current timestamp
+//            $currenttimestamp = (int) current_time('timestamp');
+//
+//            // get recommendation window(in hours) from wordpress options and convert it to seconds
+//            $recommendationwindow = $this->settingsmanager->getLastHoursCount() * 3600;
+//
+//            // check if '$recommendationwindow' hours passed without a recommendation
+//            if ($currenttimestamp > $lasttimestamp + $recommendationwindow) {
+//                return TRUE;
+//            }
+//        }
+//
+//        return FALSE;
+        //TODO: fix caching functionality
+        return TRUE;
     }
 
     /**
@@ -209,7 +214,7 @@ class RecommenderWidget extends WP_Widget {
         $language = substr($lang, 0, strrpos($lang, "-"));
         $jsonobjectcollection = JsonManager::encodeToJsonCollection($this->settingsmanager, $posts, $language);
 
-        
+
         // make post request
         $response = postRequest($url, array('JSONObjectList' => $jsonobjectcollection));
 

@@ -210,9 +210,14 @@ class RecommenderWidget extends WP_Widget {
         $url .= "/getRecommendation/" . $userid;
 
         // get json object collection    
-        $lang = get_bloginfo('language');
-        $language = substr($lang, 0, strrpos($lang, "-"));
-        $jsonobjectcollection = JsonManager::encodeToJsonCollection($this->settingsmanager, $posts, $language);
+//        $lang = get_bloginfo('language');
+//        $language = substr($lang, 0, strrpos($lang, "-"));
+        $lang = get_locale();
+        if($lang==="en_US"){
+            $lang="en";
+        }
+        var_dump($lang);
+        $jsonobjectcollection = JsonManager::encodeToJsonCollection($this->settingsmanager, $posts, $lang);
 
 
         // make post request
@@ -252,6 +257,7 @@ class RecommenderWidget extends WP_Widget {
                 'post_type' => 'post',
                 'orderby' => 'date',
                 'order' => 'DESC',
+                'suppress_filters'=> 0, 
                 'date_query' => array(array('after' => $hours . ' hours ago'))
             );
         }

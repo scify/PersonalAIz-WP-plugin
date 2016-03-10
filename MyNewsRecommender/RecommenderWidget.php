@@ -55,9 +55,18 @@ class RecommenderWidget extends WP_Widget {
 
                 foreach ($recommendations as $postid) {
                     $post = get_post($postid);
-                    echo '<a href="' . get_permalink($post->ID) . '" class="list-group-item">' . $post->post_title . '</a>';
-                }
+                    $category = get_the_category($postid);
 
+                    echo '<a href="' . get_permalink($post->ID)
+                    . '" class="list-group-item">'
+                    . '<h5 class="list-group-item-heading">'
+                    . $category[0]->name
+                    . '</h5>'
+                    . '<p class="list-group-item-text">'
+                    . $post->post_title
+                    . '</p>'
+                    . '</a>';
+                }
                 echo '</div>';
             }
         }
@@ -76,10 +85,13 @@ class RecommenderWidget extends WP_Widget {
         // check if a recommendation is required because the last one has expired
         $recommendationexpired = $this->recommendation_expired(wp_get_current_user()->ID);
 
+        $lang = get_locale();
+        if ($lang === "en_US") {
+            $lang = "en";
+        }
+
         // get recommendations from database
-        $recommendations = DbManager::get_recommendations(wp_get_current_user()->ID);
-
-
+        $recommendations = DbManager::get_recommendations(wp_get_current_user()->ID, $lang);
         // if recommendation has expired or there are not recommendations in database, ask for one
         if ($recommendationexpired || count($recommendations) == 0) {
 
@@ -129,7 +141,7 @@ class RecommenderWidget extends WP_Widget {
             }
 
             // update recommendations in databases
-            DbManager::update_recommendations(wp_get_current_user()->ID, $recommendations);
+            DbManager::update_recommendations(wp_get_current_user()->ID, $recommendations, $lang);
 
             // update last recommendation's timestamp for this user
             DbManager::update_last_timestamp(wp_get_current_user()->ID, (int) current_time('timestamp'));
@@ -153,25 +165,27 @@ class RecommenderWidget extends WP_Widget {
      */
     private function recommendation_expired($userid) {
 
-//        // get user's last recommendation timestamp
-//        $lasttimestamp = DbManager::get_last_timestamp($userid);
-//
-//        // if no recommendation has been done there is no need to check the timestamp
-//        if (!is_null($lasttimestamp)) {
-//            // get the current timestamp
-//            $currenttimestamp = (int) current_time('timestamp');
-//
-//            // get recommendation window(in hours) from wordpress options and convert it to seconds
-//            $recommendationwindow = $this->settingsmanager->getLastHoursCount() * 3600;
-//
-//            // check if '$recommendationwindow' hours passed without a recommendation
-//            if ($currenttimestamp > $lasttimestamp + $recommendationwindow) {
-//                return TRUE;
-//            }
-//        }
-//
-//        return FALSE;
-        //TODO: fix caching functionality
+        //get cache duration from settings
+        $cacheDuration = $this->settingsmanager->getCacheDuration();
+
+        //if cache Duration is >0
+        if ($cacheDuration > 0) {
+            // get user's last recommendation timestamp
+            $lasttimestamp = DbManager::get_last_timestamp($userid);
+
+            // if no recommendation has been done there is no need to check the timestamp
+            if (!is_null($lasttimestamp)) {
+                // get the current timestamp
+                $currenttimestamp = (int) current_time('timestamp');
+
+                // get cache window(in minutes) from wordpress options and convert it to seconds
+                $cacheWindow = $cacheDuration * 60;
+                // check if '$recommendationwindow' hours passed without a recommendation
+                if ($currenttimestamp < $lasttimestamp + $cacheWindow) {
+                    return FALSE;
+                }
+            }
+        }
         return TRUE;
     }
 
@@ -210,13 +224,10 @@ class RecommenderWidget extends WP_Widget {
         $url .= "/getRecommendation/" . $userid;
 
         // get json object collection    
-//        $lang = get_bloginfo('language');
-//        $language = substr($lang, 0, strrpos($lang, "-"));
         $lang = get_locale();
-        if($lang==="en_US"){
-            $lang="en";
+        if ($lang === "en_US") {
+            $lang = "en";
         }
-        var_dump($lang);
         $jsonobjectcollection = JsonManager::encodeToJsonCollection($this->settingsmanager, $posts, $lang);
 
 
@@ -257,7 +268,7 @@ class RecommenderWidget extends WP_Widget {
                 'post_type' => 'post',
                 'orderby' => 'date',
                 'order' => 'DESC',
-                'suppress_filters'=> 0, 
+                'suppress_filters' => 0,
                 'date_query' => array(array('after' => $hours . ' hours ago'))
             );
         }

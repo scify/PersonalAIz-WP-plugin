@@ -96,12 +96,14 @@ class JsonManager {
 
         // get categories if they are enabled from the feed options
         $categories = array();
-        $cats = wp_get_post_categories($post->ID);
-        foreach ($cats as $c) {
-            array_push($categories, $c . "");
-        }
 
-        if (!$settingsmanager->getCategoriesCheck()) {
+
+        if ($settingsmanager->getCategoriesCheck()) {
+            $cats = get_the_category($post->ID);
+            foreach ($cats as $c) {
+                array_push($categories, $c->name);
+            }
+        } else {
             $categories = NULL;
         }
 

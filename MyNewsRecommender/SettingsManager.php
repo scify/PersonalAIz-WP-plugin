@@ -18,6 +18,7 @@ class SettingsManager {
     private $categoriescheck;
     private $tagscheck;
     private $articlescount;
+    private $cacheDuration;
     private $lasthourscount;
 
     public function __construct() {
@@ -32,6 +33,7 @@ class SettingsManager {
         $this->categoriescheck = get_option('categoriescheck');
         $this->tagscheck = get_option('tagscheck');
         $this->articlescount = get_option('articlescount');
+        $this->cacheDuration = get_option('cacheDuration');
         $this->lasthourscount = get_option('lasthourscount');
     }
 
@@ -48,6 +50,7 @@ class SettingsManager {
         delete_option('categoriescheck');
         delete_option('tagscheck');
         delete_option('articlescount');
+        delete_option('cacheDuration');
         delete_option('lasthourscount');
     }
 
@@ -93,6 +96,10 @@ class SettingsManager {
 
     public function getArticlesCount() {
         return $this->articlescount;
+    }
+
+    public function getCacheDuration() {
+        return $this->cacheDuration;
     }
 
     public function getLastHoursCount() {
@@ -154,6 +161,10 @@ class SettingsManager {
         update_option('articlescount', $articlescount);
     }
 
+    public function setCacheDuration($cacheDuration) {
+        $this->cacheDuration = $cacheDuration;
+        update_option('cacheDuration', $cacheDuration);
+    }
     public function setLastHoursCount($lasthourscount) {
         $this->lasthourscount = $lasthourscount;
         update_option('lasthourscount', $lasthourscount);

@@ -2,6 +2,7 @@
 <?php
 require_once('SettingsManager.php');
 require_once('utility.php');
+require_once('MyNewsRecommender.php');
 ?>
 
 <?php
@@ -20,8 +21,17 @@ if ($_POST['submit'] != NULL) {
     $contentcheck = isset($_POST['contentcheck']);
     $tagscheck = isset($_POST['tagscheck']);
     $categoriescheck = isset($_POST['categoriescheck']);
+    $initCheck = isset($_POST['initCheck']);
     $articlescount = $_POST['articlescount'];
+    $cacheDuration = $_POST['cacheDuration'];
     $lasthourscount = $_POST['lasthourscount'];
+
+    //initUsers
+    if ($initCheck){
+        $MyNewsRecommender = new MyNewsRecommender();
+        $MyNewsRecommender->initUsers();
+        $initCheck=0;
+    }
 
     //
     // MUST CHECK AUTHENTICATION USING API KEY
@@ -29,7 +39,11 @@ if ($_POST['submit'] != NULL) {
 
         // update settings only if connection attributes,all weight values and recommendation settings are valid
     $connectionvalid = TRUE;
-    if (is_numeric($articlescount) && floatval($articlescount) == intval(floatval($articlescount)) && is_numeric($lasthourscount) && floatval($lasthourscount) == intval(floatval($lasthourscount))) {
+    if (is_numeric($articlescount) &&
+            floatval($articlescount) == intval(floatval($articlescount)) &&
+            is_numeric($lasthourscount) &&
+            floatval($cacheDuration) == intval(floatval($cacheDuration)) &&
+            floatval($lasthourscount) == intval(floatval($lasthourscount))) {
         $settingsmanager->setIp($ip);
         $settingsmanager->setPort($port);
         $settingsmanager->setUsername($username);
@@ -41,6 +55,7 @@ if ($_POST['submit'] != NULL) {
         $settingsmanager->setTagsCheck($tagscheck);
         $settingsmanager->setCategoriesCheck($categoriescheck);
         $settingsmanager->setArticlesCount($articlescount);
+        $settingsmanager->setCacheDuration($cacheDuration);
         $settingsmanager->setLastHoursCount($lasthourscount);
     } else {
         $result = "<div id='setting-error-invalid_admin_email' class='error settings-error notice is-dismissible'> 
@@ -66,6 +81,7 @@ if ($_POST['submit'] != NULL) {
     $tagscheck = $settingsmanager->getTagsCheck();
     $categoriescheck = $settingsmanager->getCategoriesCheck();
     $articlescount = $settingsmanager->getArticlesCount();
+    $cacheDuration = $settingsmanager->getCacheDuration();
     $lasthourscount = $settingsmanager->getLastHoursCount();
 
     $result = "";
@@ -109,12 +125,18 @@ if ($authmethod == 1) {
             <tr valign="top"><th scope="row"><label><input type="checkbox" <?php echo ($titlecheck == 1 ? "checked" : ""); ?> name="titlecheck">Title</label></th></tr>
             <tr valign="top"><th scope="row"><label><input type="checkbox" <?php echo ($contentcheck == 1 ? "checked" : ""); ?> name="contentcheck">Content</label></th></tr>
             <tr valign="top"><th scope="row"><label><input type="checkbox" <?php echo ($categoriescheck == 1 ? "checked" : ""); ?> name="categoriescheck">Categories</label></th></tr>
-            <tr valign="top"><th scope="row"><label><input type="checkbox" <?php echo ($tagscheck == 1 ? "checked" : ""); ?> name="tagscheck">Tags</label></th></tr>
+            <!--<tr valign="top"><th scope="row"><label><input type="checkbox"--> 
+            <?php // echo ($tagscheck == 1 ? "checked" : ""); ?> 
+            <!--name="tagscheck">Tags</label></th></tr>-->
         </table>
         <h2 style="margin-top:50px;">Recommendation Settings</h2>	    	
         <table class="form-table" style="margin-left:30px;">
             <tr valign="top"><th scope="row">Number of recommended articles</th><td><input type="text" name="articlescount" value="<?php echo $articlescount; ?>"/></td></tr>
+            <tr valign="top"><th scope="row">Cache duration in minutes</th><td><input type="text" name="cacheDuration" value="<?php echo $cacheDuration; ?>"/></td></tr>
             <tr valign="top"><th scope="row">Number of last hours to show articles from</th><td><input type="text" name="lasthourscount" value="<?php echo $lasthourscount; ?>"/></td></tr>
+        </table>
+        <table class="form-table" style="margin-left:30px;">
+            <tr valign="top"><th scope="row"><label><input type="checkbox" <?php echo ($initCheck == 1 ? "checked" : ""); ?> name="initCheck">Add Users</label></th></tr>
         </table>
 
         <input type='submit' name="submit" value="Save Changes" class='button-primary' id='submitbutton' style="margin-top:50px;margin-left:330px;"/>

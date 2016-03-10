@@ -36,6 +36,7 @@ class DbManager {
           user mediumint(9) NOT NULL,
           post mediumint(9) NOT NULL,
           score float(5,4) NOT NULL,
+          lang VARCHAR(4) NOT NULL,
 	  UNIQUE KEY id (id)
 	) " . $charset_collate . ";";
 
@@ -137,15 +138,18 @@ class DbManager {
      * Get all recommendations for the given user with the highest score being first.
      * 
      */
-    public static function get_recommendations($userid) {
+    public static function get_recommendations($userid, $lang) {
         global $wpdb;
 
         $listtable = $wpdb->prefix . "recommendation_list";
 
 
-        // delete all user's recommendations from db
-        $results = $wpdb->get_results("SELECT * FROM " . $listtable . " WHERE user=" . $userid . " ORDER BY score DESC");
-
+        //Get all user's recommendations from db
+        $results = $wpdb->get_results("SELECT * FROM " . $listtable 
+                . " WHERE user=" . $userid 
+                . " AND lang LIKE '" . $lang."'" 
+                . " ORDER BY score DESC");
+        
         // put all post ids in an array
         $recommendations = array();
         foreach ($results as $record) {
@@ -163,7 +167,7 @@ class DbManager {
      * @param int $userid
      * @param array $recommended Associative array with key being the recommendated post's id and value being the recommendation score.
      */
-    public static function update_recommendations($userid, $recommended) {
+    public static function update_recommendations($userid, $recommended, $lang) {
         global $wpdb;
 
         $listtable = $wpdb->prefix . "recommendation_list";
@@ -175,7 +179,12 @@ class DbManager {
         // insert user's recommended posts
         foreach ($recommended as $postid => $score) {
             // create sql query
-            $sql = "INSERT INTO " . $listtable . " (user,post,score) VALUES (" . $userid . "," . $postid . "," . $score . ")";
+            $sql = "INSERT INTO " . $listtable 
+                    . " (user,post,score,lang) VALUES (" 
+                    . $userid . "," 
+                    . $postid . "," 
+                    . $score . "," 
+                    ."'". $lang . "')";
 
             // insert recommendation
             $wpdb->query($sql);

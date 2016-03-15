@@ -1,0 +1,1 @@
+# PersonalAIz-WP-plugin
